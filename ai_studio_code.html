@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ADAMTranslator [Advanced]</title>
+    
+    <style>
+        /* CSS styles are unchanged for brevity, paste the same CSS from the previous response here */
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700&display=swap');
+        :root { --app-background-color: #141517; --surface-1: #232427; --surface-2: #303134; --primary-text: #E8EAED; --secondary-text: #969BA1; --accent-color: #8AB4F8; --page-background: #3c4043; }
+        body { margin: 0; padding: 20px; background-color: var(--page-background); font-family: 'Noto Sans Arabic', 'Google Sans', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .app-container { width: 100%; height: calc(100vh - 40px); max-width: 420px; max-height: 850px; background-color: var(--app-background-color); color: var(--primary-text); display: flex; flex-direction: column; overflow: hidden; position: relative; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid #555; }
+        .hidden { display: none !important; }
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; flex-shrink: 0; }
+        .header-logo { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 500; }
+        .user-avatar { width: 32px; height: 32px; background-color: var(--accent-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: var(--app-background-color); }
+        .main-view { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .text-input-area { flex-grow: 1; padding: 16px 24px; display: flex; flex-direction: column; }
+        .main-text-container { flex-grow: 1; display: flex; flex-direction: column; }
+        #text-input-field { background: none; border: none; color: var(--primary-text); font-size: 28px; font-family: inherit; width: 100%; flex-grow: 1; resize: none; padding: 0; }
+        #text-input-field:focus { outline: none; }
+        #text-input-field::placeholder { color: var(--secondary-text); font-weight: 400; }
+        #translate-btn { background-color: var(--accent-color); color: var(--app-background-color); border: none; border-radius: 100px; padding: 12px 24px; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 20px; align-self: center; }
+        .translation-output-container { padding: 16px 24px; background-color: var(--surface-1); min-height: 100px; font-size: 24px; color: var(--secondary-text); }
+        .language-selector { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 16px 24px; flex-shrink: 0; }
+        .lang-button { flex: 1; background-color: var(--surface-1); border: none; color: var(--primary-text); padding: 12px 16px; border-radius: 100px; font-size: 14px; font-weight: 500; text-align: center; cursor: pointer; }
+        .bottom-toolbar { display: flex; justify-content: space-around; align-items: center; padding: 16px 24px 32px 24px; flex-shrink: 0; }
+        #language-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--app-background-color); z-index: 10; display: flex; flex-direction: column; }
+        .modal-header { padding: 16px; display: flex; align-items: center; border-bottom: 1px solid var(--surface-2); }
+        .modal-header h2 { margin: 0; flex-grow: 1; text-align: center; }
+        .close-modal-btn { background: none; border: none; cursor: pointer; color: var(--primary-text); font-size: 24px; }
+        .language-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        .language-list li { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--surface-2); cursor: pointer; }
+        .language-list li:hover { background-color: var(--surface-2); }
+        .download-lang-btn { background-color: var(--surface-2); color: var(--accent-color); border: none; border-radius: 100px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 20; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-size: 24px; text-align: center; padding: 20px; }
+        .overlay small { font-size: 16px; margin-top: 10px; opacity: 0.7; max-width: 300px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Main view, modals, and overlays structure remains the same -->
+        <div id="main-view">
+             <!-- Paste the HTML structure from the previous response here -->
+            <header class="app-header">
+                <div class="header-logo"><div class="user-avatar">A</div><span>ADAMTranslator</span></div>
+            </header>
+            <main class="text-input-area">
+                <div class="main-text-container">
+                    <textarea id="text-input-field" placeholder="إدخال نص"></textarea>
+                    <div class="translation-output-container" id="translation-output">الترجمة ستظهر هنا...</div>
+                </div>
+                <button id="translate-btn">ترجمة</button>
+            </main>
+            <section class="language-selector">
+                <button class="lang-button" id="source-lang-btn">العربية</button>
+                <svg class="swap-icon" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"></path></svg>
+                <button class="lang-button" id="target-lang-btn">الإنجليزية</button>
+            </section>
+            <footer class="bottom-toolbar">
+                <button class="toolbar-button" id="camera-btn"><div class="icon-wrapper"><svg class="toolbar-icon" viewBox="0 0 24 24"><path d="M9.4 10.5h5.2v-1H9.4v1zm7.6-3.72c.8-.46 1.7-.28 2.3.4.6.68.78 1.7.32 2.5l-2.4 4.15-2-1.15 2.4-4.15c.05-.1.05-.2 0-.3zm-13 3.72L1.6 6.35c-.46-.8-.28-1.7.4-2.3.68-.6 1.7-.78 2.5-.32l4.15 2.4-1.15 2-4.15-2.4c-.1-.05-.2-.05-.3 0zM12 13c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"></path><path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h4.05l1.83-2h4.24l1.83 2H20v12z"></path></svg></div><span>الكاميرا</span></button>
+                <button class="toolbar-button mic-button" id="mic-btn"><div class="icon-wrapper"><svg class="toolbar-icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"></path></svg></div></button>
+                <button class="toolbar-button" id="conversation-btn"><div class="icon-wrapper"><svg class="toolbar-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"></path></svg></div><span>محادثة</span></button>
+            </footer>
+        </div>
+
+        <div id="language-modal" class="hidden">
+             <header class="modal-header">
+                <button class="close-modal-btn">✕</button>
+                <h2>اختر لغة</h2>
+            </header>
+            <ul id="language-list" class="language-list"></ul>
+        </div>
+
+        <div id="camera-overlay" class="overlay hidden">
+            <p>📷 الوصول إلى الكاميرا</p>
+            <small>لتفعيل الكاميرا، يجب رفع هذا الموقع على استضافة حقيقية وطلب إذن المستخدم. هذه مجرد محاكاة.</small>
+        </div>
+        <div id="mic-overlay" class="overlay hidden">
+            <p>🎙️ الوصول إلى الميكروفون</p>
+            <small>لتسجيل الصوت، يجب رفع الموقع على استضافة حقيقية وطلب إذن المستخدم. هذه مجرد محاكاة.</small>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- State Management ---
+        let currentSourceLang = 'العربية';
+        let currentTargetLang = 'الإنجليزية';
+        let activeLangButton = null; // To know which button was clicked (source or target)
+
+        // --- Simulated Dictionary (The "Mini-Engine") ---
+        const dictionary = {
+            'العربية': { 'مرحبا': 'Hello', 'كيف حالك': 'How are you', 'شكرا': 'Thank you', 'كتاب': 'Book', 'سيارة': 'Car' },
+            'الإنجليزية': { 'hello': 'مرحبا', 'how are you': 'كيف حالك', 'thank you': 'شكرا', 'book': 'كتاب', 'car': 'سيارة' },
+            'الإسبانية': { 'hello': 'Hola', 'book': 'Libro', 'car': 'Coche' }
+            // Add more languages and words here for a better simulation
+        };
+        const allLangs = Object.keys(dictionary);
+
+        // --- Element Selections ---
+        const textInputField = document.getElementById('text-input-field');
+        const translationOutput = document.getElementById('translation-output');
+        const translateBtn = document.getElementById('translate-btn');
+        const sourceLangBtn = document.getElementById('source-lang-btn');
+        const targetLangBtn = document.getElementById('target-lang-btn');
+        const languageModal = document.getElementById('language-modal');
+        const closeModalBtn = document.querySelector('.close-modal-btn');
+        const languageList = document.getElementById('language-list');
+        const cameraBtn = document.getElementById('camera-btn');
+        const micBtn = document.getElementById('mic-btn');
+        const cameraOverlay = document.getElementById('camera-overlay');
+        const micOverlay = document.getElementById('mic-overlay');
+        
+        // ======================== REALISTIC TRANSLATION (SIMULATED) ========================
+        const performTranslation = () => {
+            const inputText = textInputField.value.toLowerCase().trim();
+            if (!inputText) {
+                translationOutput.innerText = "الترجمة ستظهر هنا...";
+                return;
+            }
+            translationOutput.innerText = "جار الترجمة...";
+            
+            setTimeout(() => {
+                const sourceDict = dictionary[currentSourceLang];
+                const translation = sourceDict ? sourceDict[inputText] : null;
+
+                if (translation) {
+                    // Check if the target language is supported by our dictionary
+                    const targetDictKeys = Object.keys(dictionary);
+                    if (targetDictKeys.some(lang => lang === currentTargetLang)) {
+                         // This is a simplified logic. A real app would translate directly.
+                         // For simulation, we find the English equivalent first, then find its translation in the target language.
+                         // Example: if we want to translate "مرحبا" to Spanish, we first find its English value "Hello" then find the Spanish value for "hello".
+                         const englishWord = dictionary['العربية'][inputText] || inputText; // get the English word
+                         let finalTranslation = `[${currentTargetLang}] ${englishWord}`; // fallback
+                         for(const lang in dictionary){
+                             for(const word in dictionary[lang]){
+                                 if(dictionary[lang][word] === englishWord && lang === currentTargetLang){
+                                     finalTranslation = word;
+                                     break;
+                                 }
+                             }
+                         }
+                          translationOutput.innerText = dictionary[currentTargetLang.toLowerCase()] ? dictionary[currentTargetLang.toLowerCase()][englishWord.toLowerCase()] : "غير مدعوم";
+                          
+                          // Simplified direct translation for our small dictionary
+                          if(currentSourceLang === 'العربية' && currentTargetLang === 'الإنجليزية'){
+                              translationOutput.innerText = dictionary['العربية'][inputText];
+                          } else if(currentSourceLang === 'الإنجليزية' && currentTargetLang === 'العربية'){
+                               translationOutput.innerText = dictionary['الإنجليزية'][inputText];
+                          } else {
+                               translationOutput.innerText = `ترجمة "${inputText}" إلى ${currentTargetLang} غير مدعومة في القاموس التجريبي.`;
+                          }
+                    } else {
+                        translationOutput.innerText = `اللغة المستهدفة (${currentTargetLang}) غير مدعومة.`;
+                    }
+                } else {
+                    translationOutput.innerText = `الكلمة "${inputText}" غير موجودة في قاموسنا التجريبي.`;
+                }
+            }, 800);
+        };
+        translateBtn.addEventListener('click', performTranslation);
+        
+        // ======================== FUNCTIONAL LANGUAGE SELECTION ========================
+        const populateLanguageModal = () => {
+            languageList.innerHTML = '';
+            allLangs.forEach(lang => {
+                const listItem = document.createElement('li');
+                listItem.dataset.lang = lang;
+                listItem.innerHTML = `<span>${lang}</span>`;
+                languageList.appendChild(listItem);
+            });
+        };
+
+        const openModal = (buttonClicked) => {
+            activeLangButton = buttonClicked; // Save which button was clicked
+            populateLanguageModal();
+            languageModal.classList.remove('hidden');
+        };
+        const closeModal = () => languageModal.classList.add('hidden');
+
+        sourceLangBtn.addEventListener('click', () => openModal('source'));
+        targetLangBtn.addEventListener('click', () => openModal('target'));
+        closeModalBtn.addEventListener('click', closeModal);
+
+        languageList.addEventListener('click', (e) => {
+            const chosenLang = e.target.closest('li').dataset.lang;
+            if (activeLangButton === 'source') {
+                currentSourceLang = chosenLang;
+                sourceLangBtn.innerText = chosenLang;
+            } else {
+                currentTargetLang = chosenLang;
+                targetLangBtn.innerText = chosenLang;
+            }
+            closeModal();
+        });
+
+        // ======================== REALISTIC CAMERA/MIC MESSAGES ========================
+        cameraBtn.addEventListener('click', () => cameraOverlay.classList.remove('hidden'));
+        cameraOverlay.addEventListener('click', () => cameraOverlay.classList.add('hidden'));
+        
+        micBtn.addEventListener('click', () => micOverlay.classList.remove('hidden'));
+        micOverlay.addEventListener('click', () => micOverlay.classList.add('hidden'));
+    });
+    </script>
+</body>
+</html>
